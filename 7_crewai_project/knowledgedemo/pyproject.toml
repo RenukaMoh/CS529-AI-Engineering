@@ -1,0 +1,8 @@
+[project]
+name = "knowledgedemo"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "crewai[embeddings]>=1.15.22",
+    "docling>=2.129.0",
+]

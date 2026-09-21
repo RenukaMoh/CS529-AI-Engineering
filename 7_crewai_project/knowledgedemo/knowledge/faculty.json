@@ -1,0 +1,23 @@
+[
+    {
+      "name": "Dr. Renuka Mohanraj",
+      "qualification": "PhD in Computer Science",
+      "subjects": ["Mobile Application Development", "AI Engineering", "Data Structures", "Java", "Creative AI and Prompt Design"]
+    },
+    {
+      "name": "Dr. Prem Nair",
+      "qualification": "PhD in Mathmatics & Computer Science",
+      "subjects": ["Algorithms", "Data Structures", "Big Data", "Java"]
+    },
+    {
+      "name": "Dr. Bright Vargheese",
+      "qualification": "PhD in Computer Science",
+      "subjects": ["Java", "OOPS", "Software Engineering ", "Mobile Application development"]
+    },
+    {
+      "name": "Mrudula Mukadam",
+      "qualification": "MS in Computer Science",
+      "subjects": ["Algorithms", "DBMS", "Big Data Technology", "Data Analytics"]
+    }
+  ]
+  

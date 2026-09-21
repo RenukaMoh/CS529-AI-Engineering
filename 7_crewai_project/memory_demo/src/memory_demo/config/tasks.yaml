@@ -1,0 +1,7 @@
+support_task:
+  description: >
+    Help the customer with their request: {customer_request}
+    Remember any preferences or details they share.
+  expected_output: >
+    A helpful, personalized response addressing the customer's needs.
+  agent: support_agent

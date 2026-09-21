@@ -1,0 +1,70 @@
+# src/ai_skill_researcher/config/tasks.yaml
+
+research_task:
+  description: >
+    Research the AI skills that {role} are expected to have in {year}.
+    Focus on practical, software-development-oriented skills (not theory-heavy).
+    Cover these areas:
+    1) AI/ML foundations for developers (metrics, embeddings, basic ML concepts)
+    2) LLM app development (AI powered chatbot, prompting patterns, structured outputs, tool/function calling)
+    3) RAG and knowledge-connected applications (vector DB basics, retrieval, grounding)
+    4) Agentic AI and multi-agent systems (planning, tools, memory/state, orchestration)
+    5) Multimodal AI (text+vision, audio basics, multimodal workflows)
+    6) Cloud AI skills (using cloud AI services/APIs, deployment basics, security)
+    7) LLMOps/MLOps (evaluation, monitoring, versioning, CI checks for AI)
+    8) Responsible AI & security (privacy, prompt injection awareness, safe usage)
+
+    Requirements:
+    - Use web search to find credible sources.
+    - Extract key points as bullets under clear headings.
+    - Include a short "Sources" section listing the key references (title + link).
+  expected_output: >
+    A structured research document with clear headings for each category,
+    bullet-point findings, and a "Sources" section with credible references.
+  agent: researcher
+
+analysis_task:
+  description: >
+    Analyze the research output and create a structured AI skills framework for {role} in {year}.
+
+    Your analysis must include:
+    1) Skill Categories (grouped logically for software developers)
+    2) For each category: key skills + short definition + why it matters
+    3) Must-have and Nice-to-have classification for {year}
+    4) A short list of the Top 10 must-have skills overall (across categories)
+
+    Rules:
+    - Use only the research_task output as your source.
+    - Keep wording clear and practical for students.
+  expected_output: >
+    A structured skills framework with categories, must-have vs nice-to-have skills,
+    short explanations, and a Top 10 must-have list.
+  agent: analyst
+  context:
+    - research_task
+    
+report_task:
+  description: >
+    Create the final user-friendly report: "AI Skills & Tools for {role} ({year})".
+
+    Use ONLY the analysis_task output. Do not add new research.
+
+    The report must include ONLY these sections:
+    1) Executive Summary (5-7 lines)
+    2) Skill Categories Table with columns:
+       Category | Key Skills | Why It Matters | Tools to Know
+    3) Top 10 Must-Have Skills for {year} (bullets)
+    4) Tool Stack to Know for the top 10 must-have skills
+
+    Formatting rules:
+    - Use clear headings (Markdown).
+    - Keep sentences short and user-friendly.
+    - Avoid long paragraphs.
+  expected_output: >
+    A polished Markdown report containing exactly the 4 required sections,
+    with a clean table and grouped tool list.
+  agent: report_writer
+  context:
+    - analysis_task
+  output_file: output/ai_skills_{year}.md
+

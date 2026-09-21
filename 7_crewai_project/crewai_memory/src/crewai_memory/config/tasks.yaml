@@ -1,0 +1,15 @@
+support_task:
+  description: >
+    Respond to the following user request:
+
+    {request}
+
+    Use relevant information from shared memory when it helps.
+    If the user provides a useful personal fact or preference,
+    acknowledge it.
+
+  expected_output: >
+    A clear, friendly, accurate, and personalized response
+    to the user's request.
+
+  agent: support_agent
