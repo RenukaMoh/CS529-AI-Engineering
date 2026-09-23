@@ -15,8 +15,8 @@ def send_email(subject: str, html_body: str) -> Dict[str, str]:
     print("SENDGRID_API_KEY loaded?", bool(os.getenv("SENDGRID_API_KEY")))
     print("Starts with SG?", str(os.getenv("SENDGRID_API_KEY", "")).startswith("SG."))
     
-    from_email = Email("renuka.mohanraj@outlook.com") # put your verified sender here
-    to_email = To("renukamohanraj2004@gmail.com") # put your recipient here
+    from_email = Email("example@gmail.com") # put your verified sender here
+    to_email = To("example1@gmail.com") # put your recipient here
     content = Content("text/html", html_body)
     mail = Mail(from_email, to_email, subject, content).get()
     response = sg.client.mail.send.post(request_body=mail)
