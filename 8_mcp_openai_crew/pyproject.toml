@@ -1,0 +1,12 @@
+[project]
+name = "8-mcp-openai-crew"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "crewai>=1.15.22",
+    "mcp[cli]>=1.28.1",
+    "openai-agents>=0.20.0",
+    "python-dotenv>=1.2.3",
+]

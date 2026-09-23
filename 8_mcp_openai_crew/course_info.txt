@@ -1,0 +1,70 @@
+Course Title: AI Engineering
+
+Topics Covered:
+- Introduction to Generative AI
+- Large Language Models
+- Prompt Engineering
+- AI Agents
+- Open AI Agnets SDK
+- Crew AI
+- Retrieval-Augmented Generation
+- MCP and Tool Integration
+- Multi-Agent Workflows
+
+Course Title: Algorithms
+
+Topics Covered:
+- Algorithm design techniques
+- Time and space complexity
+- Big-O notation
+- Searching algorithms
+- Sorting algorithms
+- Divide and conquer
+- Greedy algorithms
+- Dynamic programming
+- Graph algorithms
+- Recursion and backtracking
+
+Course Title: Software Engineering
+
+Topics Covered:
+- Introduction to software engineering
+- Software development life cycle
+- Requirements gathering and analysis
+- Software design principles
+- UML diagrams
+- Agile development
+- Testing and debugging
+- Version control
+- Software maintenance
+- Project management basics
+
+Course Title: Enterprise Architecture
+
+Topics Covered:
+- Introduction to enterprise architecture
+- Business architecture
+- Application architecture
+- Data architecture
+- Technology architecture
+- Architecture frameworks
+- TOGAF basics
+- IT strategy alignment
+- Governance and standards
+- Digital transformation support
+
+Course Title: Data Structures with Java
+
+Topics Covered:
+- Introduction to data structures
+- Arrays and strings
+- Linked lists
+- Stacks
+- Queues
+- Recursion
+- Trees
+- Binary search trees
+- Hashing
+- Graph basics
+- Java collections framework
+- Searching and sorting in Java
