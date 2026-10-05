@@ -44,6 +44,8 @@ def save_leave_decision(
 
     file_exists = os.path.exists(CSV_FILE)
 
+# newline="" lets the csv module handle row endings correctly
+# and helps prevent extra blank lines in the CSV file.
     with open(CSV_FILE, "a", newline="", encoding="utf-8") as file:
         writer = csv.writer(file)
 
@@ -152,7 +154,7 @@ agent = Agent(
     """,
 
     tools=[approve_leave],
-    model="gpt-5-mini"
+    model="gpt-6-astra"
 )
 
 
@@ -174,8 +176,8 @@ async def submit_request(user_request):
     if not user_request.strip():
         return (
             "### Please enter a leave request.",
-            None,
-            None
+            None, # No Input
+            None # No Output
         )
 
     result = await Runner.run(agent, user_request)
@@ -384,6 +386,7 @@ before the request can be completed.
     # Gradio states preserve values between separate button clicks:
     # run_state -> paused agent workflow
     # interruption_state -> specific tool call waiting for approval
+    # Intial values are None
     run_state = gr.State()
     interruption_state = gr.State()
 
@@ -418,15 +421,7 @@ before the request can be completed.
     #   interruption_state
     # --------------------------------------------------------
 
-    """submit_button.click(
-        fn=submit_request,
-        inputs=[user_input],
-        outputs=[
-            status_output,
-            run_state,
-            interruption_state
-        ]
-    )"""
+
     submit_button.click(
         fn=show_processing,
         outputs=status_output
@@ -435,8 +430,8 @@ before the request can be completed.
         inputs=[user_input],
         outputs=[
             status_output,
-            run_state,
-            interruption_state
+            run_state, # Paused Run State object
+            interruption_state # ToolApprovalItem for approve_leave
          ]
     )
 
@@ -463,8 +458,8 @@ before the request can be completed.
         ],
         outputs=[
             status_output,
-            run_state,
-            interruption_state,
+            run_state, # After approval, Component state becomes None
+            interruption_state, # Tool Executed and component state becomes None
             rejection_reason
         ]
     )

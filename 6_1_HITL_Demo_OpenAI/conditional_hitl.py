@@ -7,7 +7,7 @@ from agents.decorators import tool
 
 
 # ---------------------------------------------------------
-# Load the OpenAI API key from the .env file
+# 1. LOAD ENVIRONMENT VARIABLES
 # ---------------------------------------------------------
 
 load_dotenv()
@@ -17,56 +17,61 @@ if not os.getenv("OPENAI_API_KEY"):
 
 
 # ---------------------------------------------------------
-# CONDITIONAL APPROVAL POLICY
+# 2. CONDITIONAL APPROVAL POLICY
 #
-# Return True  -> Human approval required; tool pauses.
-# Return False -> No approval required; tool executes.
+# Purpose: Decide whether the weather tool needs human approval.
+# Input:   Tool arguments through params.
+# Process: Check the requested city.
+# Output:  True  -> HITL approval required
+#          False -> Tool executes automatically
 # ---------------------------------------------------------
 
-async def needs_approval(_ctx, params, _call_id) -> bool:
+async def requires_oakland_approval(_ctx, params, _call_id) -> bool:
 
     city = params.get("city", "")
 
     print("Approval function called")
     print("City received:", city)
 
-    # Human approval is required only for Oakland
+    # Human approval is required only for Oakland.
     return "Oakland" in city
 
 
 # ---------------------------------------------------------
-# WEATHER TOOL
+# 3. WEATHER TOOL
 #
-# The approval function is connected to the tool through
-# needs_approval=needs_approval.
+# The approval policy is connected to the tool using
+# needs_approval=requires_oakland_approval.
 # ---------------------------------------------------------
 
-@tool(needs_approval=needs_approval)
+@tool(needs_approval=requires_oakland_approval)
 async def get_temperature(city: str) -> str:
     """Return a simulated temperature for a city."""
 
-    return f"The temperature in {city} is 20° Celsius"
+    return f"The temperature in {city} is 20° Celsius."
 
 
 # ---------------------------------------------------------
-# CREATE AGENT
+# 4. CREATE AGENT
 # ---------------------------------------------------------
 
 agent = Agent(
     name="Weather Agent",
     instructions="""
-    Use the get_temperature tool to answer
-    temperature questions.
+    Use the get_temperature tool to answer temperature questions.
     """,
     tools=[get_temperature],
-    model="gpt-5-mini",
+    model="gpt-6-astra",
 )
 
 
 # ---------------------------------------------------------
-# TEST FUNCTION
+# 5. TEST WEATHER REQUEST
 #
-# Runs the agent and checks whether HITL was triggered.
+# Purpose: Run a weather request and demonstrate conditional HITL.
+# Input:   City name.
+# Process: Run the agent and check for an HITL interruption.
+# Output:  Automatic result or human approval/rejection result.
 # ---------------------------------------------------------
 
 async def test_weather(city):
@@ -75,18 +80,65 @@ async def test_weather(city):
     print(f"Weather Request: {city}")
     print("=" * 45)
 
+    # Start the agent workflow.
     result = await Runner.run(
         agent,
         f"What is the temperature in {city}? "
         "Use the get_temperature tool."
     )
 
-    # If interruptions exist, the tool is waiting
-    # for human approval.
+    # -----------------------------------------------------
+    # CASE: HUMAN APPROVAL REQUIRED
+    # -----------------------------------------------------
+
     if result.interruptions:
 
         print("HITL Status: HUMAN APPROVAL REQUIRED")
         print("Tool execution is paused.")
+
+        # Convert the paused result into RunState.
+        # This state is needed to resume the same workflow.
+        state = result.to_state()
+
+        # Get the tool call that is waiting for human approval.
+        interruption = result.interruptions[0]
+
+        print("Tool:", interruption.name)
+        print("Arguments:", interruption.arguments)
+
+        # Ask the human reviewer for a decision.
+        decision = input("\nApprove weather tool? (yes/no): ")
+
+        if decision.strip().lower() == "yes":
+
+            # Record the human approval in RunState.
+            state.approve(interruption)
+
+            print("Human Decision: APPROVED")
+
+        else:
+
+            reason = input("Enter rejection reason: ")
+
+            # Record the rejection and reason in RunState.
+            state.reject(
+                interruption,
+                rejection_message=reason
+            )
+
+            print("Human Decision: REJECTED")
+            print("Rejection Reason:", reason)
+
+        # Resume the SAME paused workflow after the
+        # human approval/rejection decision.
+        result = await Runner.run(agent, state)
+
+        print("\nFinal Result:")
+        print(result.final_output)
+
+    # -----------------------------------------------------
+    # CASE: HUMAN APPROVAL NOT REQUIRED
+    # -----------------------------------------------------
 
     else:
 
@@ -95,24 +147,24 @@ async def test_weather(city):
 
 
 # ---------------------------------------------------------
-# RUN TWO TEST CASES
+# 6. RUN TWO TEST CASES
 # ---------------------------------------------------------
 
 async def main():
 
     # CASE 1:
-    # Chicago -> condition returns False
-    # Tool executes automatically.
+    # Chicago -> approval condition returns False.
+    # The weather tool executes automatically.
     await test_weather("Chicago")
 
     # CASE 2:
-    # Oakland -> condition returns True
-    # Tool pauses for human approval.
+    # Oakland -> approval condition returns True.
+    # The workflow pauses for a human decision.
     await test_weather("Oakland, CA")
 
 
 # ---------------------------------------------------------
-# Start the async Python program
+# 7. START THE ASYNC PYTHON PROGRAM
 # ---------------------------------------------------------
 
 if __name__ == "__main__":
