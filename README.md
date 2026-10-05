@@ -17,6 +17,7 @@ Lesson demos, sample code, and project materials for CS529 AI Engineering. The n
 | [3_HelloAgents](3_HelloAgents) | First agent examples |
 | [4_AgenticPatterns](4_AgenticPatterns) | Agent workflow patterns |
 | [5_PythonScripts](5_PythonScripts) | Supporting Python scripts |
+| [6_1_HITL_Demo_OpenAI](./6_1_HITL_Demo_OpenAI/) | Human-in-the-loop demos using OpenAI Agents SDK, including conditional approval and a Gradio leave-request interface. |
 | [6_meomorymgt](6_meomorymgt) | Session memory examples |
 | [7_crewai_project](7_crewai_project) | CrewAI projects |
 | [8_mcp_openai_crew](8_mcp_openai_crew) | MCP examples with OpenAI Agents SDK and CrewAI |
