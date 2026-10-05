@@ -4,17 +4,20 @@ from dotenv import load_dotenv
 
 # Load environment variables from .env
 load_dotenv()
+
+
 # -------------------------------------------------------------
-# Tool: returns behavior rules based on the education use case
+# Tool: Returns behavior rules based on the education use case
 # -------------------------------------------------------------
 @function_tool
 def get_education_mode(use_case: str) -> dict:
     """
-    Returns a small 'mode profile' that the agent can follow.
+    Returns a small mode profile that the agent can follow.
     """
+
     use_case = (use_case or "").strip().lower()
 
-    if use_case in ["tutor", "teaching", "concept"]:
+    if use_case == "tutor":
         return {
             "mode": "TUTOR",
             "style_rules": [
@@ -24,7 +27,7 @@ def get_education_mode(use_case: str) -> dict:
             ],
         }
 
-    if use_case in ["assignment", "coach", "project"]:
+    if use_case == "assignment":
         return {
             "mode": "ASSIGNMENT",
             "style_rules": [
@@ -34,75 +37,131 @@ def get_education_mode(use_case: str) -> dict:
             ],
         }
 
-    # Default mode
+    # General mode
     return {
         "mode": "GENERAL",
         "style_rules": [
             "Be helpful and clear.",
-            "Keep answers concise.",
+            "Keep answers concise."
         ],
     }
 
 
-# -------------------------------------------------
-# Main Education Assistant  Agent (uses the tool)
-# -------------------------------------------------
+# -------------------------------------------------------------
+# Main Education Assistant Agent
+# -------------------------------------------------------------
 agent = Agent(
     name="EduAssistant",
     instructions=(
         "You are an education-focused assistant for university students.\n"
-        "Always call the tool get_education_mode(use_case) at the start of a session (first user message).\n"
-        "Use the returned mode/style_rules to shape your responses.\n"
+        "Call the tool get_education_mode(use_case) to determine "
+        "how you should respond.\n"
+        "Use the returned mode and style_rules to shape your responses.\n"
         "Keep explanations simple and practical."
     ),
     tools=[get_education_mode],
 )
 
 
-# ---------------------------------------------------------------
-# Two sessions(tutor and assignment) stored in the SAME DB file
-# ---------------------------------------------------------------
-
-# To store in the current working directory
+# -------------------------------------------------------------
+# Database location
+# All sessions are stored in the SAME database
+# -------------------------------------------------------------
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "educonversations.db")
 
-print("\nMulti-Session Demo (same DB):")
-print("Type a session id like: tutor_session or assignment_session")
-print("Commands: /switch, /exit\n")
 
-current_session_id = input("Enter session id: ").strip()
-current_use_case = input("Choose use case (tutor / assignment): ").strip()
+# -------------------------------------------------------------
+# Function: Select session and automatically determine use case
+# -------------------------------------------------------------
+def select_session():
 
-session = SQLiteSession(current_session_id, db_path=DB_PATH)
+    while True:
 
-# "Seed" the session with the use case (so the agent can call tool using this value)
-# We pass it as part of the first user turn context.
-first_turn_prefix = f"[USE_CASE={current_use_case}] "
+        session_id = input(
+            "\nEnter session "
+            "(tutor_session / assignment_session / general_session): "
+        ).strip().lower()
 
+        if session_id == "tutor_session":
+            use_case = "tutor"
+
+        elif session_id == "assignment_session":
+            use_case = "assignment"
+
+        elif session_id == "general_session":
+            use_case = "general"
+
+        else:
+            print("Invalid session. Please choose one of the listed sessions.")
+            continue
+
+        # Create/open the selected session
+        session = SQLiteSession(
+            session_id,
+            db_path=DB_PATH
+        )
+
+        return session_id, use_case, session
+
+
+# -------------------------------------------------------------
+# Start Program
+# -------------------------------------------------------------
+print("\nMulti-Session Education Assistant")
+print("---------------------------------")
+print("Available sessions:")
+print("  tutor_session")
+print("  assignment_session")
+print("  general_session")
+print("\nCommands: /switch, /exit")
+
+
+# Select initial session
+current_session_id, current_use_case, session = select_session()
+
+print(
+    f"\nCurrent session: {current_session_id} "
+    f"| Mode: {current_use_case}"
+)
+
+
+# -------------------------------------------------------------
+# Conversation Loop
+# -------------------------------------------------------------
 while True:
-    user_text = input("You: ").strip()
 
+    user_text = input("\nYou: ").strip()
+
+    # Ignore empty messages
     if not user_text:
         continue
 
+    # Exit program
     if user_text.lower() in ["/exit", "exit", "quit"]:
         print("Agent: Goodbye!")
         break
 
-    if user_text.lower().startswith("/switch"):
-        # Switch session (still same DB)
-        current_session_id = input("Enter NEW session id or tutor_session or assignment_session").strip()
-        current_use_case = input("Choose use case (tutor / assignment): ").strip()
-        session = SQLiteSession(current_session_id, db_path=DB_PATH) 
-    # The value stored as [USE_CASE=assignment] or [USE_CASE=tutor]
-        first_turn_prefix = f"[USE_CASE={current_use_case}] " 
-        print(f"(Switched to session: {current_session_id} | use case: {current_use_case})")
+    # Switch to another session
+    if user_text.lower() == "/switch":
+
+        current_session_id, current_use_case, session = select_session()
+
+        print(
+            f"\nSwitched to: {current_session_id} "
+            f"| Mode: {current_use_case}"
+        )
+
         continue
 
-    # Add the use case hint only for the first message in a fresh run.
-    # (Simple approach: we add the prefix every time—safe and easy.)
-    # first_turn_prefix = [USE_CASE=assignment] or [USE_CASE=tutor]
-    prompt = first_turn_prefix + user_text
-    result = Runner.run_sync(agent, prompt, session=session)
+    # Add use case information to the user's prompt
+    prompt = f"[USE_CASE={current_use_case}] {user_text}"
+
+    # Run agent using the selected SQLite session
+    result = Runner.run_sync(
+        agent,
+        prompt,
+        session=session
+    )
+
     print("Agent:", result.final_output)
